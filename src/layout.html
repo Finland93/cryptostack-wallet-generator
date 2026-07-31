@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--
+  ===========================================================================
+  The Content-Security-Policy below is not decoration. It is the security
+  model, and it is worth understanding line by line before you change it.
+
+    default-src 'none'      Nothing loads unless a later rule allows it.
+    connect-src 'none'      THE IMPORTANT ONE. No fetch, no XHR, no WebSocket,
+                            no EventSource, no sendBeacon. Ever. This holds
+                            even if the JavaScript on this page is malicious,
+                            which is the whole point: a key-stealer that got in
+                            through a compromised dependency would have nowhere
+                            to send the keys.
+    img-src data:           An image tag pointed at evil.example/?seed=… would
+                            exfiltrate just as well as a fetch. Same for CSS
+                            url(), fonts, and form submissions — hence
+                            font-src and form-action being pinned too.
+                            (Written out in words rather than as a real tag on
+                            purpose: this is a comment, and comments are one
+                            mistyped delimiter away from being markup. Nothing
+                            in this file should be a live off-site URL, not
+                            even an example of one.)
+    script-src 'sha256-…'   The hash of the one inline script in this file,
+    style-src  'sha256-…'   and of the one inline stylesheet. The browser
+                            computes them itself and runs the block only on an
+                            exact match. Change one byte of either — by
+                            tampering, or by editing this file by hand — and
+                            the browser runs nothing at all. No CDN can be
+                            reached, no eval, and an injected script tag
+                            cannot match a hash that was computed before it
+                            existed.
+                            The build fills these in; they are placeholders in
+                            src/index.html because their value depends on the
+                            bytes they cover.
+    base-uri 'none'         Stops an injected <base> from re-pointing every
+                            relative URL on the page.
+    worker-src blob:        The search threads. The worker source travels
+                            inside the script above and starts from a blob URL,
+                            because a page opened from a folder has no origin
+                            to load a separate worker file from.
+
+  Note what is NOT here: 'self'. There is nothing to load from self. This file
+  contains the cryptography, the application, the stylesheet, the fonts and
+  the worker, and it fetches nothing from anywhere, ever. That is what makes
+  it work identically from a web server, from a USB stick and from a folder on
+  a machine that has never been online — see the build note in tools/build.mjs.
+
+  What this does NOT stop, stated honestly: browser extensions. Their content
+  scripts run in an isolated world with their own permissions and are not
+  bound by this policy. If you are generating a wallet you intend to fund,
+  open this file on a machine that is not connected to anything.
+  ===========================================================================
+-->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src '{{SCRIPT_HASH}}';
+  style-src '{{STYLE_HASH}}';
+  font-src data:;
+  img-src data:;
+  connect-src 'none';
+  form-action 'none';
+  frame-src 'none';
+  object-src 'none';
+  media-src 'none';
+  manifest-src 'none';
+  worker-src blob:;
+  base-uri 'none';
+">
+<meta name="referrer" content="no-referrer">
+
+{{SEO}}
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0c0e'/%3E%3Cpath d='M8 22V10h5a6 6 0 010 12H8z' fill='none' stroke='%23ffa028' stroke-width='2.5'/%3E%3Cpath d='M20 10v12M17 16h7' stroke='%23ffa028' stroke-width='2.5'/%3E%3C/svg%3E">
+{{STYLE}}
+</head>
+<body>
+
+<!--
+  ===========================================================================
+  The boot notice. Read the CSS in main.css before touching this.
+
+  This block is plain, visible HTML on purpose. It is not hidden by an
+  attribute, and nothing needs to run for it to appear. main.css hides it and
+  app.js keeps it hidden — so it shows up only when this page could not start,
+  which now means one of two things:
+
+    1. The bytes changed after the build. The script and the stylesheet in
+       this file are pinned by the sha256 hashes in the CSP above; the browser
+       recomputes them and refuses the block on any mismatch. Editing this
+       file by hand does that. So does someone else editing it. From inside
+       the page those are identical, so the notice assumes the worse one and
+       says do not type a seed phrase.
+       (If you edited it yourself: run `npm run build`, which recomputes the
+       hashes. Do not delete the hashes to make your edit run. They are the
+       thing standing between a reader and a swapped bundle.)
+
+    2. A browser too old for the code. Nothing sinister — but a wallet
+       generator that half-runs is worse than one that says so.
+
+  It no longer mentions file://, because there is nothing to say: this page has
+  no subresources to be refused. It runs from a folder, a USB stick or a web
+  server identically. That was the whole reason for inlining everything.
+
+  ===========================================================================
+-->
+<div class="boot-notice" role="alert">
+  <p class="boot-notice-head">
+    This page did not start. Do not enter a seed phrase.
+    
+  </p>
+  <ul>
+    <li>
+      <strong>The browser refused to run this file's script.</strong> It is pinned by a
+        hash in this page's Content-Security-Policy, and the browser recomputes that hash on every load. A refusal
+        means the bytes are not the bytes this page was built from — someone or something changed them. Check it
+        yourself: <code>sha256sum</code> this file and compare it against <code>SHA256SUMS</code> in the
+        repository. If it does not match, throw the file away and download it again.
+      
+    </li>
+    <li>
+      <strong>Or your browser is too old.</strong> This needs a 2022-or-later browser. If you
+        just edited the file yourself, that is the other explanation — run <code>npm run build</code> to recompute
+        the hashes rather than removing them.
+      
+    </li>
+  </ul>
+</div>
+
+<header class="masthead">
+  <a class="wordmark" href="index.html">CRYPTO<b>STACK</b></a>
+  <p class="tagline">{{TAGLINE}}</p>
+</header>
+
+<nav class="tabs">
+{{NAV}}
+</nav>
+
+<div class="shell">
+  <main>
+{{CONTENT}}
+  </main>
+
+{{RAIL}}
+</div>
+
+<footer class="foot">
+  <span>cryptostack-wallet-generator &middot; MIT &middot; no analytics, no telemetry, no balance checks</span>
+  <span>
+    <a href="{{REPO}}">Source</a> &middot;
+    <a href="{{REPO}}/blob/main/SHA256SUMS">Verify this file</a>
+  </span>
+</footer>
+
+{{SCRIPT}}
+</body>
+</html>
