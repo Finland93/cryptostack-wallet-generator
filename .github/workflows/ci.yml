@@ -1,0 +1,124 @@
+# What is being defended here, and from whom.
+#
+# The threat is not a broken test. The threat is that the page a stranger loads
+# in their browser, and generates a wallet they intend to fund with, is not the
+# page in this repository. Every job below exists to narrow that gap.
+#
+#   test    — the derivations are right, checked against official vectors and
+#             against independent libraries implementing the same specs. Also
+#             the invariants: no page makes a network request, nothing touches
+#             storage, every CSP is intact with hashes that still cover the
+#             blocks they name, and every page has its own title, description,
+#             canonical and h1.
+#             See test/invariants.test.mjs.
+#   verify  — the committed build output is byte-for-byte what src/ produces.
+#             Pages serves the committed bytes, so this is the step that ties
+#             what gets reviewed to what gets executed. Output that drifts from
+#             its source is what a supply-chain attack looks like.
+#
+# The tests run across several Node versions, because a build that is only
+# reproducible on one machine is not reproducible.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Lets the checks be re-run against an untouched repository, which is how you
+  # find out that something changed under you rather than in a commit.
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      # ci, not install: install the lockfile, resolve nothing fresh. A build
+      # that quietly picks up a new dependency version is not a build anyone
+      # can verify.
+      - run: npm ci
+
+      - name: Derivations and invariants
+        run: npm test
+
+  verify:
+    name: build is reproducible
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # Rebuilds from src/ and fails if the committed artifacts differ by a
+      # single byte. If this is red, either someone hand-edited the built
+      # output — exactly the shape of an attack — or someone changed src/ and
+      # forgot to run `npm run build`. The second is common and harmless. The
+      # first is the reason this job exists, and CI cannot tell them apart.
+      # Read the diff yourself.
+      - name: Built output matches src/
+        run: npm run verify
+
+      # The published hashes must also describe the published files. If this
+      # fails while verify passes, SHA256SUMS is stale.
+      - name: SHA256SUMS matches the artifacts
+        run: sha256sum -c SHA256SUMS
+
+  deploy:
+    name: deploy to Pages
+    # Only after both gates are green. A red build must never become the page
+    # someone generates a key with.
+    needs: [test, verify]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      # The repository root is the site. There is deliberately no build step
+      # here: the artifacts were built and committed by a human, reviewed as a
+      # diff, and proved identical to src/ by the verify job above. Building
+      # here instead would mean the deployed bytes had never been looked at by
+      # anyone.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
