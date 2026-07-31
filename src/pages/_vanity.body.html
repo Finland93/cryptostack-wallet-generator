@@ -1,0 +1,69 @@
+  <div class="card">
+    <h2 data-i18n="vanity.h">Search for an address pattern</h2>
+    <p class="lede" data-i18n="vanity.lede"></p>
+
+    <div class="controls">
+      <div class="ctl wide">
+        <label for="v-chain" data-i18n="vanity.chain">Chain</label>
+        <select id="v-chain"></select>
+        <span class="hint" id="v-note"></span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="ctl">
+        <label for="v-prefix" data-i18n="vanity.prefix">Starts with</label>
+        <input type="text" id="v-prefix" spellcheck="false" autocomplete="off"
+               autocapitalize="off" autocorrect="off">
+      </div>
+      <div class="ctl">
+        <label for="v-suffix" data-i18n="vanity.suffix">Ends with</label>
+        <input type="text" id="v-suffix" spellcheck="false" autocomplete="off"
+               autocapitalize="off" autocorrect="off">
+      </div>
+      <div class="ctl narrow">
+        <label for="v-threads" data-i18n="vanity.threads">Threads</label>
+        <input type="number" id="v-threads" min="1" max="32" value="4">
+      </div>
+    </div>
+    <p class="hint">
+      Legal characters:
+      
+      <code class="mono" id="v-alphabet"></code>
+    </p>
+
+    <div id="v-notice"></div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="v-start" data-generates data-i18n="vanity.start">Start search</button>
+      <button id="v-stop" disabled data-i18n="vanity.stop">Stop</button>
+      <button id="v-clear" data-i18n="vanity.clear">Clear results</button>
+      <span id="v-status" class="row-status" data-i18n="vanity.idle"></span>
+    </div>
+
+    <dl class="readout">
+      <div><dt data-i18n="vanity.difficulty">Difficulty</dt><dd class="mono" id="v-difficulty">—</dd></div>
+      <div><dt data-i18n="vanity.expected">Expected tries</dt><dd class="mono" id="v-expected">—</dd></div>
+      <div><dt data-i18n="vanity.eta">Median time</dt><dd class="mono" id="v-eta">—</dd></div>
+      <div><dt data-i18n="vanity.attempts">Tried</dt><dd class="mono accent" id="v-attempts">0</dd></div>
+      <div><dt data-i18n="vanity.rate">Per second</dt><dd class="mono" id="v-rate">0</dd></div>
+      <div><dt data-i18n="vanity.elapsed">Elapsed</dt><dd class="mono" id="v-elapsed">0s</dd></div>
+      <div><dt data-i18n="vanity.probability">Odds by now</dt><dd class="mono" id="v-probability">0%</dd></div>
+    </dl>
+  </div>
+
+  <div class="hazard">
+    Before you use a vanity address for real money
+    
+    A vanity address is not more secure than a random one — it is a random one that you kept because you liked how it looked. The danger is not the address. The danger is <strong>address poisoning</strong>: once people recognise your wallet by its first few characters, an attacker can generate a lookalike with the same ones and slip it into your transaction history, hoping you copy the wrong one. Never copy an address from a block explorer's history. Compare the whole string, not the ends.
+    
+    The full explanation, including how a vanity generator lost Wintermute $160 million, is under <a href="#risks">Risks</a>.
+    
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="vanity.found">Match</h2>
+    <div id="v-results">
+      <p class="hint" id="v-empty" data-i18n="vanity.noresults"></p>
+    </div>
+  </div>

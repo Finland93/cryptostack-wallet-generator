@@ -1,0 +1,84 @@
+  <div class="card">
+    <h2 data-i18n="seed.h">Generate a seed phrase wallet</h2>
+    <p class="lede" data-i18n="seed.lede"></p>
+
+    <div class="controls">
+      <div class="ctl narrow">
+        <label for="s-words" data-i18n="seed.words">Length</label>
+        <select id="s-words">
+          <option value="24" selected>24</option>
+          <option value="21">21</option>
+          <option value="18">18</option>
+          <option value="15">15</option>
+          <option value="12">12</option>
+        </select>
+      </div>
+      <div class="ctl end">
+        <button class="btn-primary" id="s-generate" data-generates data-i18n="seed.generate">Generate new phrase</button>
+      </div>
+    </div>
+
+    <!--
+      There is no box to paste a seed phrase into, and there will not be one.
+
+      This page generates. It does not import. Three reasons, in order of how
+      much they matter:
+
+        1. "Type your seed phrase into this website" is the shape of every
+           seed-phrase phishing page there has ever been. This site's own
+           security guide tells people never to do it. A tool cannot print that
+           warning above a textarea that does exactly it and expect the warning
+           to win — what people learn is the muscle memory, and the next site
+           that asks will not be this one.
+        2. A field that turns a mnemonic into addresses is a scanner with the
+           scanning removed. The tool this project replaced generated random
+           mnemonics, derived their addresses, and asked an RPC which ones held
+           money. Take the RPC call out of that and you have an import box. The
+           distance between the two is one function, and the whole point of
+           this project is not to be one function away from that.
+        3. It was never what was asked for. This makes addresses and wallets.
+
+      To check that a phrase produces the addresses you expect, restore it in
+      the wallet you actually intend to use, offline. That is the check that
+      counts anyway: it tests the wallet you will be trusting, not this page.
+    -->
+
+    <div class="controls">
+      <div class="ctl">
+        <label for="s-passphrase" data-i18n="seed.passphrase">Passphrase</label>
+        <input type="password" id="s-passphrase" autocomplete="new-password" spellcheck="false">
+        <span class="hint" data-i18n="seed.passphrase.hint"></span>
+      </div>
+      <div class="ctl narrow">
+        <label for="s-count" data-i18n="seed.count">Addresses</label>
+        <input type="number" id="s-count" min="1" max="20" value="3">
+      </div>
+    </div>
+
+    <div class="controls stacked">
+      <div class="ctl wide">
+        <span class="ctl-label" data-i18n="seed.chains">Show addresses for</span>
+        <div class="chips" id="s-chains"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="s-clear" data-i18n="seed.clear">Clear</button>
+      <label class="chip push">
+        <input type="checkbox" id="s-showkeys">
+        <span data-i18n="seed.keys">Show private keys</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="hazard">
+    These words are the wallet
+    
+    Anyone who reads them owns every coin on every chain derived from them, forever, with no recourse. There is no password reset and no support line. Write them on paper. Do not photograph them, do not put them in a password manager's "notes" field, do not type them into a website that is not this one running offline, and never type them anywhere in response to someone who contacted you first.
+    
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="seed.address">Addresses</h2>
+    <div id="s-output"></div>
+  </div>

@@ -1,0 +1,70 @@
+<div class="card">
+  <p class="lede">Two generators that run entirely inside this page. There is no server, no account, and nothing
+    to install. Nothing you type or generate leaves your browser — the page has no way to send it, and refuses to
+    try.</p>
+
+  <div class="home-grid">
+    <a class="home-tile" href="vanity-address-generator.html">
+      <h2>Vanity address generator</h2>
+      <p>An address that starts or ends with the characters you pick. Ethereum and every EVM chain, Bitcoin
+        (bech32, Taproot, legacy), Solana and TRON.</p>
+      <span class="home-go">Generate a vanity address &rarr;</span>
+    </a>
+    <a class="home-tile" href="bip39-seed-phrase-generator.html">
+      <h2>BIP-39 seed phrase generator</h2>
+      <p>A brand-new 12- to 24-word phrase and the BTC, ETH, SOL and TRON addresses it derives, with every
+        derivation path shown. Optional passphrase, printable paper backup. It generates only — there is nowhere
+        to put an existing phrase, and that is deliberate.</p>
+      <span class="home-go">Generate a seed phrase &rarr;</span>
+    </a>
+  </div>
+</div>
+
+<div class="card prose">
+  <h2>What this is</h2>
+  <p>A wallet generator is a page that draws a private key and shows you the addresses it produces. That is a
+    small amount of arithmetic, and it does not require a server — which means that any wallet generator asking
+    you to trust one is asking for something it does not need.</p>
+  <p>This one asks for nothing. Each page here is a single HTML file with the cryptography, the interface, the
+    fonts and the worker threads inside it. Download it, unplug the machine, open the file: it behaves the same,
+    because there was never anything for it to fetch.</p>
+
+  <h2>What it will not do</h2>
+  <p><strong>It does not check the balance of any wallet it generates.</strong> Not now, not behind a setting.
+    Checking a balance means sending an address to somebody's server, which then knows that address and your IP
+    address belong together — a freshly generated wallet whose balance you "just checked" is not a private
+    wallet any more. And a tool that generates keys <em>and</em> checks their balances is not a wallet
+    generator at all; it is a tool for finding other people's money.</p>
+  <p>This is not a promise, it is a property. The page's Content-Security-Policy contains
+    <code>connect-src 'none'</code>, which is the browser refusing every outbound request the page could make —
+    including in the case where the page's own code has turned hostile. Use your wallet or a block explorer for
+    balances. That is what they are for.</p>
+
+  <h2>Which chains</h2>
+  <table class="cmp">
+    <thead><tr><th>Chain</th><th>Derivation path</th><th>Addresses start</th></tr></thead>
+    <tbody>
+      <tr><td>Ethereum and every EVM chain</td><td class="mono">m/44'/60'/0'/0/0</td><td class="mono">0x</td></tr>
+      <tr><td>Bitcoin — Native SegWit</td><td class="mono">m/84'/0'/0'/0/0</td><td class="mono">bc1q</td></tr>
+      <tr><td>Bitcoin — Taproot</td><td class="mono">m/86'/0'/0'/0/0</td><td class="mono">bc1p</td></tr>
+      <tr><td>Bitcoin — Legacy</td><td class="mono">m/44'/0'/0'/0/0</td><td class="mono">1</td></tr>
+      <tr><td>Bitcoin — Nested SegWit</td><td class="mono">m/49'/0'/0'/0/0</td><td class="mono">3</td></tr>
+      <tr><td>Solana</td><td class="mono">m/44'/501'/0'/0'</td><td class="mono">—</td></tr>
+      <tr><td>TRON</td><td class="mono">m/44'/195'/0'/0/0</td><td class="mono">T</td></tr>
+    </tbody>
+  </table>
+  <p>The EVM address is the same on Polygon, BNB Chain, Arbitrum, Optimism, Base and Avalanche C-Chain: one
+    address, every EVM chain.</p>
+
+  <h2>Before you generate anything</h2>
+  <div class="callout">
+    <p><strong>If a wallet is going to hold real money, use a hardware wallet.</strong> That is not modesty. A
+      device that never exposes the key to a general-purpose computer beats every precaution a web page can
+      take, including all of the ones here. This tool is at its best for learning how derivation works, for
+      checking that a phrase produces the addresses you expect, for testing, and for vanity addresses you have
+      thought carefully about.</p>
+  </div>
+  <p>If you are going to use it anyway: read <a href="vanity-address-risks.html">the risks of vanity
+    addresses</a> before generating one, and <a href="wallet-security-guide.html">how to generate a wallet
+    safely</a> before generating a phrase you intend to fund.</p>
+</div>
