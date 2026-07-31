@@ -1,0 +1,44 @@
+{
+  "name": "cryptostack-wallet-generator",
+  "version": "1.0.0",
+  "description": "Offline-capable vanity address and BIP-39 wallet generator. Runs entirely in the browser, never touches the network.",
+  "homepage": "https://finland93.github.io/cryptostack-wallet-generator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/finland93/cryptostack-wallet-generator"
+  },
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "reachable": "node tools/reachable.mjs",
+    "serve": "node tools/serve.mjs",
+    "verify": "node tools/build.mjs --check"
+  },
+  "dependencies": {
+    "@noble/curves": "1.7.0",
+    "@noble/hashes": "1.6.1",
+    "@scure/base": "1.1.9",
+    "@scure/bip32": "1.5.0",
+    "@scure/bip39": "1.4.0"
+  },
+  "devDependencies": {
+    "@fontsource/ibm-plex-mono": "5.1.1",
+    "@fontsource/ibm-plex-sans": "5.1.1",
+    "@fontsource/ibm-plex-sans-condensed": "5.1.0",
+    "@fontsource/ibm-plex-serif": "5.1.1",
+    "acorn": "8.17.0",
+    "acorn-walk": "8.3.5",
+    "bip32": "4.0.0",
+    "bitcoinjs-lib": "6.1.6",
+    "ecpair": "2.1.0",
+    "esbuild": "0.24.0",
+    "ethers": "6.13.4",
+    "tiny-secp256k1": "2.2.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
